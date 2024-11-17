@@ -1,0 +1,36 @@
+name: update proxy
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update-proxies:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    
+    - name: Run proxy update script
+      run: |
+        echo "${{ secrets.script }}" | base64 --decode > update.js
+        node update.js
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.name "bexnxx"
+        git config --local user.email "bexnxx@gmail.com"
+        git add *.txt
+        if git diff --cached --exit-code; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update proxy files"
+          git push
+        fi
